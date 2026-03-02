@@ -172,6 +172,17 @@ Add translation keys to `platform/i18n/src/locales/en-US/Buttons.json` and other
 
 ## Important Notes
 
+### Git Workflow
+- Always verify git operations complete successfully before reporting completion
+- If network issues occur during push/pull, inform the user and suggest manual retry
+- After commit, verify with `git status` before proceeding
+
+### Infrastructure Checks
+- The project requires Node.js 18+ and Yarn 1.22.22
+- Ensure no other process is using port 3000 before running dev server
+- If port is in use, the server will automatically use the next available port
+
+### Build Issues
 - The project uses both `.ts` and `.js` files - don't confuse compiled `.js` files with source files
 - If you see build errors about duplicate files, run `yarn clean` to clear build artifacts
 - Use `yarn dev:fast` for faster development builds (uses rsbuild instead of webpack)
