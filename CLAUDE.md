@@ -10,17 +10,17 @@ OHIF (Open Health Imaging Foundation) Viewer is a zero-footprint medical imaging
 
 ## Development Commands
 
-All commands run from `Viewers/` directory:
+All commands run from root directory:
 
 ```bash
-# Install (always use frozen lockfile for security)
+# Install dependencies (requires Yarn 1.22.22)
 yarn install --frozen-lockfile
 
 # Dev server (uses public cloud PACS by default)
 yarn dev
 yarn dev:orthanc        # With Orthanc PACS
 yarn dev:dcm4chee       # With DCM4CHEE PACS
-yarn dev:fast           # rsbuild (experimental, faster)
+yarn dev:fast           # rsbuild (faster, recommended for development)
 
 # Testing
 yarn test:unit                          # All unit tests with coverage
@@ -30,6 +30,10 @@ yarn test:e2e                           # Playwright E2E tests
 # Build
 yarn build              # Production
 yarn build:package-all  # Build all packages
+
+# Clean
+yarn clean              # Remove build artifacts
+yarn clean:deep         # Remove build artifacts and node_modules
 ```
 
 ## Repository Structure
@@ -109,6 +113,35 @@ When a mode route activates (`platform/app/src/routes/Mode/Mode.tsx`):
 3. Wires up extension modules (commands, panels, viewports)
 4. Applies hanging protocol to arrange display sets in viewports
 
+### Adding New Features
+
+#### Adding Toolbar Buttons
+Toolbar buttons are defined in mode directories (e.g., `modes/basic/src/toolbarButtons.ts`), not in extensions. Buttons use the `evaluate` property to conditionally enable/disable based on viewport state.
+
+#### Adding Commands
+Commands are registered in extensions' `commandsModule.ts`. Each command has:
+- An `action` function that implements the logic
+- A `definition` that maps the command name to the action
+
+Example structure:
+```typescript
+const actions = {
+  myCommand: ({ viewportId, ...params }) => {
+    // Implementation
+  }
+};
+
+const definitions = {
+  myCommand: {
+    commandFn: actions.myCommand,
+    options: {},
+  }
+};
+```
+
+#### Internationalization
+Add translation keys to `platform/i18n/src/locales/en-US/Buttons.json` and other language files. Use `i18n.t('Buttons:Key')` in toolbar button definitions.
+
 ## Testing
 
 ### Unit Tests (Jest)
@@ -136,6 +169,13 @@ When a mode route activates (`platform/app/src/routes/Mode/Mode.tsx`):
 - Node.js 18+, Yarn 1.22.22
 - Enable workspaces: `yarn config set workspaces-experimental true`
 - Use `--frozen-lockfile` flag for `yarn install` to ensure reproducible dependencies
+
+## Important Notes
+
+- The project uses both `.ts` and `.js` files - don't confuse compiled `.js` files with source files
+- If you see build errors about duplicate files, run `yarn clean` to clear build artifacts
+- Use `yarn dev:fast` for faster development builds (uses rsbuild instead of webpack)
+- Port 3000 is used by default; if occupied, the server will use the next available port
 
 ## Updating Dependencies
 
