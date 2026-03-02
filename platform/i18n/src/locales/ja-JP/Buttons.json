@@ -38,5 +38,9 @@
   "Stack Scroll": "スタックスクロール",
   "Stop": "$t(Common:Stop)",
   "Themes": "テーマ",
-  "Zoom": "ズーム"
+  "Zoom": "ズーム",
+  "Remove Patient Table": "患者テーブルを除去",
+  "Remove patient table from VR view (automatic detection based on HU values)": "VRビューから患者テーブルを除去（HU値に基づく自動検出）",
+  "Reset Patient Table": "患者テーブルをリセット",
+  "Reset patient table clipping to show full volume": "テーブルクリッピングをリセットして全体积を表示"
 }

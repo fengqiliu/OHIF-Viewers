@@ -83,6 +83,53 @@ const toolbarButtons: Button[] = [
       },
     },
   },
+  // Patient table removal buttons for VR
+  {
+    id: 'removePatientTable',
+    uiType: 'ohif.toolButton',
+    props: {
+      icon: 'Trash',
+      label: i18n.t('Buttons:Remove Patient Table'),
+      tooltip: i18n.t('Buttons:Remove patient table from VR view (automatic detection based on HU values)'),
+      commands: {
+        commandName: 'removePatientTable',
+        commandOptions: {},
+      },
+      evaluate: [
+        'evaluate.action',
+        {
+          name: 'evaluate.viewport.supported',
+          unsupportedViewportTypes: ['video', 'stack'],
+        },
+        {
+          name: 'evaluate.displaySetIsReconstructable',
+        },
+      ],
+    },
+  },
+  {
+    id: 'resetPatientTable',
+    uiType: 'ohif.toolButton',
+    props: {
+      icon: 'tool-reset',
+      label: i18n.t('Buttons:Reset Patient Table'),
+      tooltip: i18n.t('Buttons:Reset patient table clipping to show full volume'),
+      commands: {
+        commandName: 'resetVolumeClipping',
+        commandOptions: {},
+      },
+      evaluate: [
+        'evaluate.action',
+        {
+          name: 'evaluate.viewport.supported',
+          unsupportedViewportTypes: ['video', 'stack'],
+        },
+        {
+          name: 'evaluate.displaySetIsReconstructable',
+        },
+      ],
+    },
+  },
   {
     id: 'dataOverlayMenu',
     uiType: 'ohif.dataOverlayMenu',

@@ -127,5 +127,9 @@
   ,
   "Radius (mm)": "Rayon (mm)",
   "Dynamic": "Dynamique",
-  "Range": "Plage"
+  "Range": "Plage",
+  "Remove Patient Table": "Retirer la table du patient",
+  "Remove patient table from VR view (automatic detection based on HU values)": "Retirer la table du patient de la vue VR (détection automatique basée sur les valeurs HU)",
+  "Reset Patient Table": "Réinitialiser la table du patient",
+  "Reset patient table clipping to show full volume": "Réinitialiser le rognage de la table pour afficher le volume complet"
 }

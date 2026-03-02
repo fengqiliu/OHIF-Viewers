@@ -55,6 +55,10 @@ import { EasingFunctionEnum } from './utils/transitions';
 import { createSegmentationForViewport } from './utils/createSegmentationForViewport';
 import { utilities as segmentationUtilities } from '@cornerstonejs/tools/segmentation';
 import i18n from '@ohif/i18n';
+import { detectPatientTable } from './utils/patientTableDetection';
+
+// Module-level storage for volume clipping state (patient table removal)
+const clippingStateMap = new Map<string, { originalBounds: number[]; clippedBounds: number[] }>();
 
 const { add, intersect, subtract, copy } = cstUtils.contourSegmentation;
 
@@ -2475,6 +2479,164 @@ function commandsModule({
         }
       }
     },
+
+    /**
+     * Removes the patient table from a volume viewport by detecting and applying
+     * clipping planes based on high HU value regions (metal/plastic table).
+     * This is useful for VR (Volume Rendering) visualization to remove the bed.
+     */
+    removePatientTable: ({ viewportId }) => {
+      const viewport = cornerstoneViewportService.getCornerstoneViewport(viewportId);
+
+      if (!viewport) {
+        console.warn('removePatientTable: No viewport found for', viewportId);
+        return;
+      }
+
+      // Check if this is a VolumeViewport
+      if (!(viewport instanceof VolumeViewport)) {
+        console.warn('removePatientTable: Viewport is not a VolumeViewport');
+        return;
+      }
+
+      // Get the volume from the viewport
+      const actors = viewport.getActors();
+      if (!actors || actors.length === 0) {
+        console.warn('removePatientTable: No actors in viewport');
+        return;
+      }
+
+      // Get the first volume actor
+      const actorEntry = actors.find(
+        actor => actor.referencedId && actor.referencedId.includes('volume')
+      );
+      const actor = actorEntry?.actor;
+
+      if (!actor) {
+        console.warn('removePatientTable: No volume actor found');
+        return;
+      }
+
+      // Get the volume from the actor
+      // The volume ID is in the actor's UID
+      const volumeId = actorEntry.referencedId;
+      const volume = csUtils.volume.getVolumeLoaderManager().get(volumeId);
+
+      if (!volume) {
+        console.warn('removePatientTable: Could not load volume:', volumeId);
+        return;
+      }
+
+      // Detect the patient table position
+      const detectionResult = detectPatientTable(volume);
+
+      if (!detectionResult.detected) {
+        console.log('removePatientTable: No patient table detected');
+        return;
+      }
+
+      console.log('removePatientTable: Table detected with confidence:', detectionResult.confidence);
+
+      // Get the bounds of the volume
+      const imageData = volume.imageData;
+      const bounds = imageData.getBounds();
+
+      // Calculate clipping bounds based on detection
+      let clippedBounds: [number, number, number, number, number, number];
+
+      if (detectionResult.clippingPlanePosition && detectionResult.clippingPlaneNormal) {
+        const [xMin, xMax, yMin, yMax, zMin, zMax] = bounds as number[];
+        const normal = detectionResult.clippingPlaneNormal;
+
+        // If normal points up (Y positive), clip the bottom
+        // If normal points down (Y negative), clip the top
+        if (normal[1] > 0) {
+          // Table at bottom - clip from yMin to detected position
+          clippedBounds = [
+            xMin,
+            xMax,
+            detectionResult.clippingPlanePosition[1],
+            yMax,
+            zMin,
+            zMax,
+          ];
+        } else {
+          // Table at top - clip from detected position to yMax
+          clippedBounds = [
+            xMin,
+            xMax,
+            yMin,
+            detectionResult.clippingPlanePosition[1],
+            zMin,
+            zMax,
+          ];
+        }
+      } else {
+        // Fallback: clip 10% from the detected end
+        const [xMin, xMax, yMin, yMax, zMin, zMax] = bounds as number[];
+        const volumeHeight = yMax - yMin;
+        clippedBounds = [xMin, xMax, yMin + volumeHeight * 0.1, yMax, zMin, zMax];
+      }
+
+      // Apply the clipping bounds to the actor
+      actor.setMapperInputConnection(actor.getMapper().getInputConnection(0));
+
+      // Use VTK to set the clipping region
+      // The mapper has setClippingPlanes but we need to use the bounds
+      const mapper = actor.getMapper();
+
+      // Store the clipping state for reset using module-level map
+      clippingStateMap.set(viewportId, {
+        originalBounds: bounds,
+        clippedBounds: clippedBounds,
+      });
+
+      // Apply clipping by updating the crop box
+      // This approach uses the volume actor's cropping
+      try {
+        // Set the crop region on the actor
+        actor.setCroppingPlanes(clippedBounds);
+        viewport.render();
+      } catch (error) {
+        console.error('removePatientTable: Error setting clipping planes:', error);
+      }
+    },
+
+    /**
+     * Resets the volume clipping to show the full volume again.
+     */
+    resetVolumeClipping: ({ viewportId }) => {
+      const viewport = cornerstoneViewportService.getCornerstoneViewport(viewportId);
+
+      if (!viewport) {
+        console.warn('resetVolumeClipping: No viewport found for', viewportId);
+        return;
+      }
+
+      // Check if there's stored clipping state in the module-level map
+      const clippingState = clippingStateMap.get(viewportId);
+
+      if (!clippingState?.originalBounds) {
+        console.log('resetVolumeClipping: No clipping state to reset');
+        return;
+      }
+
+      // Get the actor and reset the cropping
+      const actors = viewport.getActors();
+      const actorEntry = actors.find(
+        actor => actor.referencedId && actor.referencedId.includes('volume')
+      );
+      const actor = actorEntry?.actor;
+
+      if (actor) {
+        // Reset to original bounds
+        actor.setCroppingPlanes(clippingState.originalBounds);
+        viewport.render();
+      }
+
+      // Clear the clipping state from the map
+      clippingStateMap.delete(viewportId);
+    },
   };
 
   const definitions = {
@@ -2802,6 +2964,16 @@ function commandsModule({
     },
     displayCPRReformation: {
       commandFn: actions.displayCPRReformation,
+    },
+
+    // Patient table removal commands for VR
+    removePatientTable: {
+      commandFn: actions.removePatientTable,
+      options: {},
+    },
+    resetVolumeClipping: {
+      commandFn: actions.resetVolumeClipping,
+      options: {},
     },
   };
 

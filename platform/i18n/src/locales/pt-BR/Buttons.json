@@ -39,5 +39,9 @@
   "Stack Scroll": "Navegar Stacks",
   "Stop": "Parar",
   "Themes": "Temas",
-  "Zoom": "Zoom"
+  "Zoom": "Zoom",
+  "Remove Patient Table": "Remover mesa do paciente",
+  "Remove patient table from VR view (automatic detection based on HU values)": "Remover a mesa do paciente da visualização VR (detecção automática baseada em valores HU)",
+  "Reset Patient Table": "Redefinir mesa do paciente",
+  "Reset patient table clipping to show full volume": "Redefinir o corte da mesa para mostrar o volume completo"
 }

@@ -46,5 +46,9 @@
   "Themes": "Themen",
   "Zoom": "Zoomen",
   "More Tools": "Weitere Werkzeuge",
-  "More Measure Tools": "Weitere Messwerkzeuge"
+  "More Measure Tools": "Weitere Messwerkzeuge",
+  "Remove Patient Table": "Patiententisch entfernen",
+  "Remove patient table from VR view (automatic detection based on HU values)": "Patiententisch aus der VR-Ansicht entfernen (automatische Erkennung basierend auf HU-Werten)",
+  "Reset Patient Table": "Patiententisch zurücksetzen",
+  "Reset patient table clipping to show full volume": "Tischbeschneidung zurücksetzen um das gesamte Volumen anzuzeigen"
 }
