@@ -267,3 +267,29 @@ Extensions are configured in mode files. Each mode specifies:
 
 - `yarn install:update-lockfile` - Updates both yarn.lock and bun.lock
 - `yarn audit` - Run security audit (ignores GHSA-5j98-mcp5-4vw2)
+
+## Local Customizations
+
+This codebase has been customized with the following features:
+
+### AdvancedRenderingControls
+A mouse-aware floating toolbar that auto-hides after 3 seconds and reappears when the mouse approaches the viewport edges. Located at `extensions/cornerstone/src/components/AdvancedRenderingControls/`. Supports positioning at TopMiddle, BottomMiddle, LeftMiddle, RightMiddle.
+
+### VR Volume Rendering
+- One-click patient table removal for VR volume rendering
+- Enhanced volume rendering controls in the cornerstone extension
+
+### Dynamic Volume Panel
+Image generation panel for 4D dynamic volumes at `extensions/cornerstone-dynamic-volume/src/panels/PanelGenerateImage.tsx`
+
+### Modified Toolbar Buttons
+Custom toolbar configurations in:
+- `modes/basic/src/toolbarButtons.ts`
+- `modes/segmentation/src/toolbarButtons.ts`
+- `modes/tmtv/src/toolbarButtons.ts`
+
+### Key Modified Extensions
+- `extensions/cornerstone/src/` - Core rendering, segmentation, viewport services
+- `extensions/cornerstone-dicom-pmap/src/` - Parametric map SOP handler
+- `extensions/cornerstone-dicom-sr/src/tools/` - DICOM SR display tool
+- `extensions/dicom-video/src/` - Video SOP handler
