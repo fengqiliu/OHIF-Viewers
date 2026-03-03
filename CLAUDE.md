@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 OHIF (Open Health Imaging Foundation) Viewer is a zero-footprint medical imaging viewer for DICOM images. It's a configurable and extensible progressive web application with out-of-the-box support for DICOMweb image archives.
 
-**Key Technologies**: React, TypeScript, Cornerstone3D (medical image rendering), Webpack/rsbuild
+**Key Technologies**: React, TypeScript, Cornerstone3D (medical image rendering), Webpack/rsbuild, Lerna/Yarn Workspaces
 
 ## Development Commands
 
@@ -18,48 +18,84 @@ yarn install --frozen-lockfile
 
 # Dev server (uses public cloud PACS by default)
 yarn dev
-yarn dev:orthanc        # With Orthanc PACS
+yarn dev:orthanc        # With Orthanc PACS (local Docker)
 yarn dev:dcm4chee       # With DCM4CHEE PACS
 yarn dev:fast           # rsbuild (faster, recommended for development)
+yarn dev:static         # Serve static files
+
+# Start local Orthanc for testing
+yarn orthanc:up
 
 # Testing
 yarn test:unit                          # All unit tests with coverage
 jest --testPathPattern=<file>           # Single test file
+yarn test-watch                         # Watch mode
 yarn test:e2e                           # Playwright E2E tests
+yarn test:e2e:ui                        # E2E with UI
+yarn test:e2e:debug                     # E2E debug mode
 
 # Build
-yarn build              # Production
+yarn build              # Production build
+yarn build:dev          # Development build
+yarn build:qa            # QA build
+yarn build:ci           # CI build
 yarn build:package-all  # Build all packages
+yarn build:demo         # Demo build
 
 # Clean
 yarn clean              # Remove build artifacts
 yarn clean:deep         # Remove build artifacts and node_modules
+
+# Maintenance
+yarn see-changed        # List changed packages since last release
+yarn audit              # Security audit
 ```
 
 ## Repository Structure
 
 This is a **monorepo** managed by Lerna and Yarn Workspaces (with NX for task caching):
 
-- **`platform/`** - Core infrastructure:
-  - `core` - Business logic, services, extension management
-  - `ui` - React component library
-  - `ui-next` - Next-gen UI components
-  - `i18n` - Internationalization
-  - `app` - Main viewer entry point
+```
+Viewers/
+├── platform/              # Core infrastructure
+│   ├── core/             # Business logic, services, extension management
+│   ├── ui/               # React component library
+│   ├── ui-next/          # Next-gen UI components
+│   ├── i18n/             # Internationalization (locales in src/locales/)
+│   ├── app/              # Main viewer entry point (routes, config)
+│   ├── cli/              # CLI tools
+│   └── docs/             # Documentation site
+├── extensions/           # Modular functionality (17+ extensions)
+│   ├── cornerstone/      # Image rendering with Cornerstone3D
+│   ├── cornerstone-dicom-sr/   # DICOM Structured Report
+│   ├── cornerstone-dicom-seg/   # DICOM Segmentation
+│   ├── cornerstone-dicom-rt/    # DICOM RTSTRUCT
+│   ├── cornerstone-dicom-pmap/  # DICOM Parametric Map
+│   ├── cornerstone-dynamic-volume/  # 4D volume
+│   ├── default/          # Basic datasource, panels, toolbar
+│   ├── measurement-tracking/    # Longitudinal measurements
+│   ├── tmtv/            # Total Metabolic Tumor Volume
+│   ├── dicom-video/     # DICOM Video
+│   ├── dicom-pdf/       # DICOM PDF
+│   └── dicom-microscopy/ # Whole Slide Microscopy
+├── modes/                # Workflow configurations (11+ modes)
+│   ├── basic/            # Basic viewer mode
+│   ├── longitudinal/     # Measurement tracking workflow
+│   ├── tmtv/            # TMTV calculation mode
+│   ├── microscopy/      # Microscopy mode
+│   └── segmentation/    # Segmentation mode
+├── addOns/               # Optional external dependencies
+│   └── externals/       # External libraries
+├── tests/               # E2E tests (Playwright)
+└── .recipes/            # Docker configurations
+```
 
-- **`extensions/`** - Modular functionality:
-  - `cornerstone` - Image rendering with Cornerstone3D
-  - `default` - Basic datasource, panels, toolbar
-  - `dicom-sr` - DICOM Structured Report
-  - `dicom-seg` - DICOM Segmentation
-  - `dicom-rt` - DICOM RTSTRUCT
-  - `measurement-tracking` - Longitudinal measurement tracking
-  - `tmtv` - Total Metabolic Tumor Volume
-
-- **`modes/`** - Workflow configurations:
-  - `basic-dev-mode` - Basic development mode
-  - `longitudinal` - Measurement tracking workflow
-  - `tmtv` - TMTV calculation mode
+**Key directories:**
+- `platform/core/src/extensions/` - Extension system implementation
+- `platform/core/src/services/` - Core services
+- `platform/ui/src/components/` - Reusable UI components
+- `extensions/*/src/` - Extension source code
+- `modes/*/src/` - Mode configurations
 
 ## Architecture
 
@@ -139,8 +175,28 @@ const definitions = {
 };
 ```
 
+#### Adding a New Extension
+1. Create extension in `extensions/` directory
+2. Define `getModuleModule()` returning typed modules
+3. Register in mode's `id` array (e.g., `modes/basic/src/index.ts`)
+
+#### Adding a New Mode
+1. Create mode in `modes/` directory
+2. Define `id`, `routeName`, `extensions`, `layout`, `toolbarButtons`
+3. Add to `buildModeRoutes.tsx` or register via config
+
 #### Internationalization
 Add translation keys to `platform/i18n/src/locales/en-US/Buttons.json` and other language files. Use `i18n.t('Buttons:Key')` in toolbar button definitions.
+
+### Key Files and Entry Points
+
+- `platform/app/src/App.tsx` - Main application entry
+- `platform/app/src/routes/index.tsx` - Route definitions
+- `platform/app/src/init.ts` / `appInit.js` - Application initialization
+- `platform/core/src/extensions/ExtensionManager.ts` - Extension loading
+- `platform/core/src/extensions/MODULE_TYPES.ts` - Extension type definitions
+- `modes/*/src/index.ts` - Mode configuration
+- `extensions/*/src/index.ts` - Extension module exports
 
 ## Testing
 
@@ -182,11 +238,30 @@ Add translation keys to `platform/i18n/src/locales/en-US/Buttons.json` and other
 - Ensure no other process is using port 3000 before running dev server
 - If port is in use, the server will automatically use the next available port
 
+### Docker for Local PACS
+- Use `yarn orthanc:up` to start local Orthanc PACS with test data
+- Docker must be running on the host machine
+- Configuration: `platform/app/.recipes/Nginx-Orthanc/docker-compose.yml`
+
 ### Build Issues
 - The project uses both `.ts` and `.js` files - don't confuse compiled `.js` files with source files
 - If you see build errors about duplicate files, run `yarn clean` to clear build artifacts
 - Use `yarn dev:fast` for faster development builds (uses rsbuild instead of webpack)
 - Port 3000 is used by default; if occupied, the server will use the next available port
+
+### Data Flow
+1. User loads study → `dataSourcesModule` fetches DICOM metadata
+2. `SopClassHandlerModule` maps SOP classes to DisplaySets
+3. `DisplaySetService` creates display sets from series
+4. `HangingProtocolService` applies layout rules
+5. `ViewportGridService` arranges display sets in viewports
+6. `viewportModule` renders images via Cornerstone3D
+
+### Extension Configuration
+Extensions are configured in mode files. Each mode specifies:
+- Which extensions to load via `extensions` array
+- Layout template via `layoutTemplateModule`
+- Tool groups via `toolbarButtons` or mode config
 
 ## Updating Dependencies
 
