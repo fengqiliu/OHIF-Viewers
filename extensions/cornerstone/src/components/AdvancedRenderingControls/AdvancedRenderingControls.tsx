@@ -87,7 +87,13 @@ function AdvancedRenderingControls({
     return null;
   }
 
-  if (!hasColorbar) {
+  // Check if there are any buttons that should always show (like removePatientTable)
+  const hasTableRemovalButtons = toolbarButtons.some(
+    btn => btn?.id === 'removePatientTable' || btn?.id === 'resetPatientTable'
+  );
+
+  // Only hide entire control if no colorbar AND no table removal buttons
+  if (!hasColorbar && !hasTableRemovalButtons) {
     return null;
   }
 

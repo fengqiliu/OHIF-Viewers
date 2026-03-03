@@ -369,6 +369,45 @@ export default function getToolbarModule({ servicesManager, extensionManager }: 
       },
     },
     {
+      name: 'evaluate.viewport.type',
+      evaluate: ({ viewportId, viewportTypes, disabledText }) => {
+        const viewport = cornerstoneViewportService.getCornerstoneViewport(viewportId);
+
+        if (!viewport) {
+          return;
+        }
+
+        // Get the viewport type string
+        const viewportType = viewport.type;
+
+        // Map internal viewport types to user-friendly names
+        const typeMap = {
+          '0': 'stack',
+          '1': 'volume',
+          '2': 'orthographic',
+          '3': 'volume3d',
+          '4': 'video',
+          '5': 'wholeslide',
+          STACK: 'stack',
+          VOLUME: 'volume',
+          ORTHOGRAPHIC: 'orthographic',
+          VOLUME_3D: 'volume3d',
+          VIDEO: 'video',
+          WHOLE_SLIDE: 'wholeslide',
+        };
+
+        // Get the normalized type name
+        const typeName = typeMap[viewportType] || viewportType?.toLowerCase?.();
+
+        // Check if viewport type is in the allowed list
+        if (viewportTypes?.length && !viewportTypes.includes(typeName)) {
+          return getDisabledState(disabledText || `This tool requires a ${viewportTypes.join(' or ')} viewport`);
+        }
+
+        return undefined;
+      },
+    },
+    {
       name: 'evaluate.modality.supported',
       evaluate: ({ viewportId, unsupportedModalities, supportedModalities, disabledText }) => {
         const displaySetUIDs = viewportGridService.getDisplaySetsUIDsForViewport(viewportId);

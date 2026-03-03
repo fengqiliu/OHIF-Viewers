@@ -3,6 +3,7 @@ import {
   StackViewport,
   VolumeViewport,
   utilities as csUtils,
+  cache,
   Enums as CoreEnums,
   Types as CoreTypes,
   BaseVolumeViewport,
@@ -2484,6 +2485,7 @@ function commandsModule({
      * Removes the patient table from a volume viewport by detecting and applying
      * clipping planes based on high HU value regions (metal/plastic table).
      * This is useful for VR (Volume Rendering) visualization to remove the bed.
+     * Supports both VolumeViewport (3D) and Orthographic (MPR) viewports.
      */
     removePatientTable: ({ viewportId }) => {
       const viewport = cornerstoneViewportService.getCornerstoneViewport(viewportId);
@@ -2493,9 +2495,9 @@ function commandsModule({
         return;
       }
 
-      // Check if this is a VolumeViewport
-      if (!(viewport instanceof VolumeViewport)) {
-        console.warn('removePatientTable: Viewport is not a VolumeViewport');
+      // Check if this is a BaseVolumeViewport (supports both VolumeViewport and Orthographic)
+      if (!(viewport instanceof BaseVolumeViewport)) {
+        console.warn('removePatientTable: Viewport is not a volume viewport');
         return;
       }
 
@@ -2520,7 +2522,7 @@ function commandsModule({
       // Get the volume from the actor
       // The volume ID is in the actor's UID
       const volumeId = actorEntry.referencedId;
-      const volume = csUtils.volume.getVolumeLoaderManager().get(volumeId);
+      const volume = cache.getVolume(volumeId);
 
       if (!volume) {
         console.warn('removePatientTable: Could not load volume:', volumeId);
@@ -2604,12 +2606,19 @@ function commandsModule({
 
     /**
      * Resets the volume clipping to show the full volume again.
+     * Supports both VolumeViewport (3D) and Orthographic (MPR) viewports.
      */
     resetVolumeClipping: ({ viewportId }) => {
       const viewport = cornerstoneViewportService.getCornerstoneViewport(viewportId);
 
       if (!viewport) {
         console.warn('resetVolumeClipping: No viewport found for', viewportId);
+        return;
+      }
+
+      // Check if this is a BaseVolumeViewport
+      if (!(viewport instanceof BaseVolumeViewport)) {
+        console.warn('resetVolumeClipping: Viewport is not a volume viewport');
         return;
       }
 

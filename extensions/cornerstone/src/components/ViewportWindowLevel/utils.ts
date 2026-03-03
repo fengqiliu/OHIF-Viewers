@@ -1,6 +1,5 @@
-import { cache as cs3DCache, Types } from '@cornerstonejs/core';
+import { cache as cs3DCache, Types, utilities as csUtils } from '@cornerstonejs/core';
 import vtkColorMaps from '@kitware/vtk.js/Rendering/Core/ColorTransferFunction/ColorMaps';
-import { utilities as csUtils } from '@cornerstonejs/core';
 import { getViewportVolumeHistogram } from './getViewportVolumeHistogram';
 
 /**

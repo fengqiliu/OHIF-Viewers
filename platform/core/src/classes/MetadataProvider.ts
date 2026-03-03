@@ -1,13 +1,11 @@
 import queryString from 'query-string';
 import dicomParser from 'dicom-parser';
-import { utilities } from '@cornerstonejs/core';
+import { calibratedPixelSpacingMetadataProvider, getPixelSpacingInformation } from '@cornerstonejs/core';
 import { imageIdToURI } from '../utils';
 import DicomMetadataStore from '../services/DicomMetadataStore';
 import fetchPaletteColorLookupTableData from '../utils/metadataProvider/fetchPaletteColorLookupTableData';
 import toNumber from '../utils/toNumber';
 import combineFrameInstance from '../utils/combineFrameInstance';
-
-const { calibratedPixelSpacingMetadataProvider, getPixelSpacingInformation } = utilities;
 
 class MetadataProvider {
   private readonly imageURIToUIDs: Map<string, any> = new Map();
@@ -570,7 +568,7 @@ const WADO_IMAGE_LOADER = {
     let imageOrientationPatient;
     if (PixelSpacing) {
       [rowPixelSpacing, columnPixelSpacing] = PixelSpacing;
-      const calibratedPixelSpacing = utilities.calibratedPixelSpacingMetadataProvider.get(
+      const calibratedPixelSpacing = calibratedPixelSpacingMetadataProvider.get(
         'calibratedPixelSpacing',
         instance.imageId
       );

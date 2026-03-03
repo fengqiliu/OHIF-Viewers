@@ -6,7 +6,8 @@ import {
   getEnabledElementByViewportId,
   imageLoader,
   Types as csTypes,
-  utilities as csUtils,
+  HistoryMemo,
+  uuidv4,
   metaData,
 } from '@cornerstonejs/core';
 import { ViewportType } from '@cornerstonejs/core/enums';
@@ -27,7 +28,7 @@ import { SegmentationPresentation, SegmentationPresentationItem } from '../../ty
 import { EasingFunctionEnum, EasingFunctionMap } from '../../utils/transitions';
 import { ViewReference } from '@cornerstonejs/core/types';
 
-const { DefaultHistoryMemo } = csUtils.HistoryMemo;
+const { DefaultHistoryMemo } = HistoryMemo;
 
 const {
   Labelmap: LABELMAP,
@@ -399,7 +400,7 @@ class SegmentationService extends PubSubService {
   ): Promise<string> {
     // Todo: random does not makes sense, make this better, like
     // labelmap 1, 2, 3 etc
-    const segmentationId = options?.segmentationId ?? `${csUtils.uuidv4()}`;
+    const segmentationId = options?.segmentationId ?? `${uuidv4()}`;
 
     const isDynamicVolume = displaySet.isDynamicVolume;
 
@@ -1002,7 +1003,7 @@ class SegmentationService extends PubSubService {
 
     const service = this;
     const memo: csTypes.Memo = {
-      id: csUtils.uuidv4(),
+      id: uuidv4(),
       operationType: 'segmentIndex',
       restoreMemo(undo?: boolean) {
         if (undo === true) {

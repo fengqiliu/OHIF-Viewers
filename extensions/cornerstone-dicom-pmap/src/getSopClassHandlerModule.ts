@@ -219,9 +219,9 @@ async function _loadParametricMap({ displaySet, headers }: withAppTypes) {
   }
   derivedVolume.voxelManager.setCompleteScalarDataArray(newPixelData);
   const range = getRangeFromPixelData(newPixelData);
-  const windowLevel = csUtils.windowLevel.toWindowLevel(range[0], range[1]);
+  const windowLevelObj = csUtils.windowLevel.toWindowLevel(range[0], range[1]);
 
-  derivedVolume.metadata.voiLut = [windowLevel];
+  derivedVolume.metadata.voiLut = [windowLevelObj];
   derivedVolume.loadStatus = { loaded: true };
 
   return derivedVolume;

@@ -1,4 +1,4 @@
-import { Types, metaData, utilities as csUtils } from '@cornerstonejs/core';
+import { Types, metaData, worldToImageCoords, imageToWorldCoords } from '@cornerstonejs/core';
 import {
   AnnotationTool,
   annotation,
@@ -246,8 +246,8 @@ export default class DICOMSRDisplayTool extends AnnotationTool {
         yOffset = rows / 10;
       }
 
-      const imagePoint = csUtils.worldToImageCoords(referencedImageId, point);
-      const arrowEnd = csUtils.imageToWorldCoords(referencedImageId, [
+      const imagePoint = worldToImageCoords(referencedImageId, point);
+      const arrowEnd = imageToWorldCoords(referencedImageId, [
         imagePoint[0] + xOffset,
         imagePoint[1] + yOffset,
       ]);

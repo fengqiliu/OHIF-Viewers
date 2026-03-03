@@ -1,4 +1,4 @@
-import { VolumeViewport, metaData, utilities } from '@cornerstonejs/core';
+import { VolumeViewport, metaData, imageToWorldCoords } from '@cornerstonejs/core';
 import { IStackViewport, IVolumeViewport } from '@cornerstonejs/core/types';
 import { AnnotationDisplayTool, drawing } from '@cornerstonejs/tools';
 import { guid, b64toBlob } from '@ohif/core/src/utils';
@@ -108,12 +108,12 @@ class ImageOverlayViewerTool extends AnnotationDisplayTool {
 
     // Decide the rendering position of the overlay image on the current canvas
     const { _id, columns: width, rows: height, x, y } = overlayData;
-    const overlayTopLeftWorldPos = utilities.imageToWorldCoords(imageId, [
+    const overlayTopLeftWorldPos = imageToWorldCoords(imageId, [
       x - 1, // Remind that top-left corner's (x, y) is be (1, 1)
       y - 1,
     ]);
     const overlayTopLeftOnCanvas = viewport.worldToCanvas(overlayTopLeftWorldPos);
-    const overlayBottomRightWorldPos = utilities.imageToWorldCoords(imageId, [width, height]);
+    const overlayBottomRightWorldPos = imageToWorldCoords(imageId, [width, height]);
     const overlayBottomRightOnCanvas = viewport.worldToCanvas(overlayBottomRightWorldPos);
 
     // add image to the annotations svg layer

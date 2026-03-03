@@ -67,7 +67,7 @@ export const toolbarButtons: Button[] = [
       },
     },
   },
-  // Patient table removal buttons for VR
+  // Patient table removal buttons for VR and MPR
   {
     id: 'removePatientTable',
     uiType: 'ohif.toolButton',
@@ -87,6 +87,10 @@ export const toolbarButtons: Button[] = [
         },
         {
           name: 'evaluate.displaySetIsReconstructable',
+        },
+        {
+          name: 'evaluate.viewport.type',
+          viewportTypes: ['volume', 'orthographic', 'volume3d'],
         },
       ],
     },
@@ -110,6 +114,10 @@ export const toolbarButtons: Button[] = [
         },
         {
           name: 'evaluate.displaySetIsReconstructable',
+        },
+        {
+          name: 'evaluate.viewport.type',
+          viewportTypes: ['volume', 'orthographic', 'volume3d'],
         },
       ],
     },

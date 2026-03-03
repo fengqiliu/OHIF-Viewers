@@ -6,7 +6,10 @@ import {
   StackViewport,
   Types,
   getRenderingEngine,
-  utilities as csUtils,
+  windowLevel,
+  getImageSliceDataForVolumeViewport,
+  clip,
+  jumpToSlice,
   VolumeViewport,
   VolumeViewport3D,
   cache,
@@ -820,7 +823,7 @@ class CornerstoneViewportService extends PubSubService implements IViewportServi
     if (!presentations.lutPresentation?.properties) {
       const { voi, voiInverted, colormap } = displaySetOptions[0];
       if (voi && (voi.windowWidth || voi.windowCenter)) {
-        const { lower, upper } = csUtils.windowLevel.toLowHighRange(
+        const { lower, upper } = windowLevel.toLowHighRange(
           voi.windowWidth,
           voi.windowCenter
         );
@@ -896,7 +899,7 @@ class CornerstoneViewportService extends PubSubService implements IViewportServi
       numberOfSlices = imageIds.length;
     } else if (viewportType === csEnums.ViewportType.ORTHOGRAPHIC) {
       const viewport = this.getCornerstoneViewport(viewportInfo.getViewportId());
-      const imageSliceData = csUtils.getImageSliceDataForVolumeViewport(viewport);
+      const imageSliceData = getImageSliceDataForVolumeViewport(viewport);
 
       if (!imageSliceData) {
         return;
@@ -914,7 +917,7 @@ class CornerstoneViewportService extends PubSubService implements IViewportServi
     const lastSliceIndex = numberOfSlices - 1;
 
     if (imageIndex !== undefined) {
-      return csUtils.clip(imageIndex, 0, lastSliceIndex);
+      return clip(imageIndex, 0, lastSliceIndex);
     }
 
     if (preset === JumpPresets.First) {
@@ -1052,7 +1055,7 @@ class CornerstoneViewportService extends PubSubService implements IViewportServi
       const properties = {} as ViewportProperties;
 
       if (voi && (voi.windowWidth || voi.windowCenter)) {
-        const { lower, upper } = csUtils.windowLevel.toLowHighRange(
+        const { lower, upper } = windowLevel.toLowHighRange(
           voi.windowWidth,
           voi.windowCenter
         );
@@ -1129,7 +1132,7 @@ class CornerstoneViewportService extends PubSubService implements IViewportServi
       const imageIndex = this._getInitialImageIndexForViewport(viewportInfo);
 
       if (imageIndex !== undefined) {
-        csUtils.jumpToSlice(viewport.element, {
+        jumpToSlice(viewport.element, {
           imageIndex,
         });
       }

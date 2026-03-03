@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import PropTypes from 'prop-types';
-import { Enums, VolumeViewport3D, utilities as csUtils } from '@cornerstonejs/core';
+import { Enums, VolumeViewport3D, jumpToSlice } from '@cornerstonejs/core';
 import { ImageScrollbar } from '@ohif/ui-next';
 
 function CornerstoneImageScrollbar({
@@ -27,7 +27,7 @@ function CornerstoneImageScrollbar({
       cineService.setCine({ id: viewportId, isPlaying: false });
     }
 
-    csUtils.jumpToSlice(viewport.element, {
+    jumpToSlice(viewport.element, {
       imageIndex,
       debounceLoading: true,
     });

@@ -1,12 +1,10 @@
 import { UltrasoundPleuraBLineTool, Enums as csToolsEnums } from '@cornerstonejs/tools';
 import { Types as OhifTypes, utils } from '@ohif/core';
-import { eventTarget, triggerEvent, utilities } from '@cornerstonejs/core';
+import { eventTarget, triggerEvent, transformWorldToIndex } from '@cornerstonejs/core';
 import getInstanceByImageId from './getInstanceByImageId';
 import { setShowPercentage } from './PleuraBlinePercentage';
 
 const { downloadBlob } = utils;
-
-const { transformWorldToIndex } = utilities;
 
 /**
  * Creates and returns the commands module for ultrasound annotation

@@ -1,5 +1,5 @@
 import { SynchronizerManager, Synchronizer } from '@cornerstonejs/tools';
-import { EVENTS, getRenderingEngine, type Types, utilities } from '@cornerstonejs/core';
+import { EVENTS, getRenderingEngine, type Types, jumpToSlice } from '@cornerstonejs/core';
 
 const frameViewSyncCallback = (
   synchronizerInstance: Synchronizer,
@@ -34,7 +34,7 @@ const frameViewSyncCallback = (
     return;
   }
 
-  utilities.jumpToSlice(tViewport.element, {
+  jumpToSlice(tViewport.element, {
     imageIndex: targetSliceIndex,
   });
 };

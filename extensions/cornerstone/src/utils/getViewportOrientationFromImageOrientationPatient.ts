@@ -1,4 +1,4 @@
-import { CONSTANTS, utilities } from '@cornerstonejs/core';
+import { CONSTANTS, isEqual } from '@cornerstonejs/core';
 
 const { MPR_CAMERA_VALUES } = CONSTANTS;
 
@@ -30,24 +30,24 @@ export const getViewportOrientationFromImageOrientationPatient = (
   const viewDown = imageOrientationPatient.slice(3, 6);
   const viewUp = [-viewDown[0], -viewDown[1], -viewDown[2]];
 
-  // Compare vectors with MPR camera values using utilities.isEqual
+  // Compare vectors with MPR camera values using isEqual
   if (
-    utilities.isEqual(viewRight, MPR_CAMERA_VALUES.axial.viewRight) &&
-    utilities.isEqual(viewUp, MPR_CAMERA_VALUES.axial.viewUp)
+    isEqual(viewRight, MPR_CAMERA_VALUES.axial.viewRight) &&
+    isEqual(viewUp, MPR_CAMERA_VALUES.axial.viewUp)
   ) {
     return 'axial';
   }
 
   if (
-    utilities.isEqual(viewRight, MPR_CAMERA_VALUES.sagittal.viewRight) &&
-    utilities.isEqual(viewUp, MPR_CAMERA_VALUES.sagittal.viewUp)
+    isEqual(viewRight, MPR_CAMERA_VALUES.sagittal.viewRight) &&
+    isEqual(viewUp, MPR_CAMERA_VALUES.sagittal.viewUp)
   ) {
     return 'sagittal';
   }
 
   if (
-    utilities.isEqual(viewRight, MPR_CAMERA_VALUES.coronal.viewRight) &&
-    utilities.isEqual(viewUp, MPR_CAMERA_VALUES.coronal.viewUp)
+    isEqual(viewRight, MPR_CAMERA_VALUES.coronal.viewRight) &&
+    isEqual(viewUp, MPR_CAMERA_VALUES.coronal.viewUp)
   ) {
     return 'coronal';
   }

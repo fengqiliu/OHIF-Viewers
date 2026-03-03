@@ -1,4 +1,4 @@
-import { Types, getRenderingEngine, utilities } from '@cornerstonejs/core';
+import { Types, getRenderingEngine, calculateViewportsSpatialRegistration } from '@cornerstonejs/core';
 
 export default function calculateViewportRegistrations(viewports: Types.IViewportId[]) {
   const viewportPairs = _getViewportPairs(viewports);
@@ -11,7 +11,7 @@ export default function calculateViewportRegistrations(viewports: Types.IViewpor
     const csViewport1 = renderingEngine1.getViewport(viewport.viewportId);
     const csViewport2 = renderingEngine2.getViewport(nextViewport.viewportId);
 
-    utilities.calculateViewportsSpatialRegistration(csViewport1, csViewport2);
+    calculateViewportsSpatialRegistration(csViewport1, csViewport2);
   }
 }
 
