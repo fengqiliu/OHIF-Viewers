@@ -65,25 +65,31 @@ Viewers/
 │   ├── app/              # Main viewer entry point (routes, config)
 │   ├── cli/              # CLI tools
 │   └── docs/             # Documentation site
-├── extensions/           # Modular functionality (17+ extensions)
+├── extensions/           # Modular functionality
 │   ├── cornerstone/      # Image rendering with Cornerstone3D
 │   ├── cornerstone-dicom-sr/   # DICOM Structured Report
 │   ├── cornerstone-dicom-seg/   # DICOM Segmentation
 │   ├── cornerstone-dicom-rt/    # DICOM RTSTRUCT
 │   ├── cornerstone-dicom-pmap/  # DICOM Parametric Map
-│   ├── cornerstone-dynamic-volume/  # 4D volume
+│   ├── cornerstone-dynamic-volume/  # 4D dynamic volume
 │   ├── default/          # Basic datasource, panels, toolbar
 │   ├── measurement-tracking/    # Longitudinal measurements
 │   ├── tmtv/            # Total Metabolic Tumor Volume
 │   ├── dicom-video/     # DICOM Video
 │   ├── dicom-pdf/       # DICOM PDF
-│   └── dicom-microscopy/ # Whole Slide Microscopy
-├── modes/                # Workflow configurations (11+ modes)
+│   ├── dicom-microscopy/ # Whole Slide Microscopy
+│   ├── test-extension/  # Testing extension
+│   └── usAnnotation/    # Ultrasound annotation extension
+├── modes/                # Workflow configurations
 │   ├── basic/            # Basic viewer mode
+│   ├── basic-dev-mode/   # Development mode
+│   ├── basic-test-mode/  # Test mode
 │   ├── longitudinal/     # Measurement tracking workflow
 │   ├── tmtv/            # TMTV calculation mode
 │   ├── microscopy/      # Microscopy mode
-│   └── segmentation/    # Segmentation mode
+│   ├── preclinical-4d/  # Preclinical 4D imaging
+│   ├── segmentation/    # Segmentation mode
+│   └── usAnnotation/    # Ultrasound mode
 ├── addOns/               # Optional external dependencies
 │   └── externals/       # External libraries
 ├── tests/               # E2E tests (Playwright)
@@ -102,10 +108,17 @@ Viewers/
 ### Initialization Flow
 
 `App.tsx` → `appInit.js` which:
-1. Creates `CommandsManager`, `ServicesManager`, `HotkeysManager`
-2. Registers core services (DisplaySet, Measurement, HangingProtocol, ViewportGrid, Toolbar, etc.)
-3. Creates `ExtensionManager` and registers extensions
-4. Builds routes from mode definitions via `buildModeRoutes.tsx`
+1. Creates `CommandsManager`, `ServicesManager`, `HotkeysManager`, `ServiceProvidersManager`
+2. Loads app configuration (supports sync object or async function)
+3. Creates `ExtensionManager` with managers and config
+4. Registers core services (MultiMonitor, UINotification, UIModal, UIDialog, Measurement, DisplaySet, Customization, Toolbar, ViewportGrid, HangingProtocol, Cine, UserAuthentication, Panel, WorkflowSteps, StudyPrefetcher)
+5. Loads and registers extensions from config
+6. Loads and instantiates modes, building routes via `buildModeRoutes.tsx`
+
+Extension registration flow in `ExtensionManager`:
+1. Each extension's `getModule()` returns typed modules (see MODULE_TYPES)
+2. Extension modules are wired to commands, services, and UI
+3. SOP Class Handlers register how DICOM series map to DisplaySets
 
 ### Extension Module Types
 
@@ -136,6 +149,18 @@ Located in `platform/core/src/services/`:
 - `ToolBarService` - Manages toolbar state and button definitions
 - `CustomizationService` - Runtime UI customization (theming, component overrides)
 - `DicomMetadataStore` - Stores and retrieves DICOM metadata
+- `CineService` - Controls cine playback and looping
+- `WorkflowStepsService` - Manages workflow step progression
+- `StudyPrefetcherService` - Prefetches studies for faster access
+- `MultiMonitorService` - Multi-monitor support
+- `PanelService` - Manages side panel state and content
+- `UserAuthenticationService` - OpenID Connect authentication
+- `UIDialogService` - Dialog/prompt management
+- `UIModalService` - Modal window management
+- `UINotificationService` - Toast notification management
+- `UIViewportDialogService` - Viewport-specific dialogs
+
+**Note:** The project uses both `@ohif/ui` (legacy) and `@ohif/ui-next` (current) component libraries. New development should use `@ohif/ui-next`.
 
 ### Modes
 
@@ -177,8 +202,9 @@ const definitions = {
 
 #### Adding a New Extension
 1. Create extension in `extensions/` directory
-2. Define `getModuleModule()` returning typed modules
-3. Register in mode's `id` array (e.g., `modes/basic/src/index.ts`)
+2. Define `getModule()` returning typed modules (see MODULE_TYPES.js)
+3. Register in mode's `extensions` array (e.g., `modes/basic/src/index.ts`)
+4. Extension modules are auto-registered by ExtensionManager
 
 #### Adding a New Mode
 1. Create mode in `modes/` directory
@@ -192,9 +218,13 @@ Add translation keys to `platform/i18n/src/locales/en-US/Buttons.json` and other
 
 - `platform/app/src/App.tsx` - Main application entry
 - `platform/app/src/routes/index.tsx` - Route definitions
-- `platform/app/src/init.ts` / `appInit.js` - Application initialization
+- `platform/app/src/appInit.js` - Application initialization
+- `platform/app/src/routes/Mode/Mode.tsx` - Mode route handler
+- `platform/app/src/routes/Mode/defaultRouteInit.ts` - Default route initialization
 - `platform/core/src/extensions/ExtensionManager.ts` - Extension loading
-- `platform/core/src/extensions/MODULE_TYPES.ts` - Extension type definitions
+- `platform/core/src/extensions/MODULE_TYPES.js` - Extension module type constants
+- `platform/core/src/services/ServicesManager.ts` - Service registry
+- `platform/ui-next/src/` - Next-gen React component library
 - `modes/*/src/index.ts` - Mode configuration
 - `extensions/*/src/index.ts` - Extension module exports
 
